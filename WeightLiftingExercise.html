@@ -93,7 +93,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 ## C    0   14 2024   14    2    0.014606
 ## D    0    0   24 1904    2    0.013472
 ## E    0    3    1    5 2156    0.004157</code></pre>
-<p>Estimated Out of Bag error is 86%. This is measure is the equivalent of accuracy using cross validation <a href="http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm">(see link)</a><br />In <em>appendix 2</em> you can see a table with measured importance of the variables included in the model.</p>
+<p>Estimated Out of Bag error is 0.86 (or accuracy being 1-0.86=99.14%). This is measure is the equivalent of accuracy using cross validation <a href="http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm">(see link)</a><br />In <em>appendix 2</em> you can see a table with measured importance of the variables included in the model.</p>
 </div>
 <div id="testing-the-model" class="section level3">
 <h3>Testing the model</h3>
@@ -130,7 +130,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 ## Detection Rate          0.283    0.192    0.172    0.162    0.183
 ## Detection Prevalence    0.284    0.193    0.176    0.163    0.183
 ## Balanced Accuracy       0.998    0.994    0.992    0.992    0.996</code></pre>
-<p>The accuracy in the test data is above 99%, so this seems to be a pretty good model for our purposes.</p>
+<p>The accuracy in the test data is above 99% (in line with oob error estimated in training section), so this seems to be a pretty good model for our purposes.</p>
 </div>
 <div id="graphs" class="section level3">
 <h3>Graphs</h3>

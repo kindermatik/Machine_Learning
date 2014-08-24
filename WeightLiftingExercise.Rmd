@@ -1,6 +1,10 @@
 ---
 title: "Weight Lifting Exercises Quality"
-output: html_document
+output:
+  html_document: default
+  pdf_document:
+    keep_tex: yes
+    latex_engine: xelatex
 ---
 
 ### Executive Summary  
@@ -56,7 +60,7 @@ Below are displayed the results of this model in the training set. Package rando
 rf.model
 ```
 
-Estimated Out of Bag error is 86%. This is measure is the equivalent of accuracy using cross validation [(see link)](http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm)  
+Estimated Out of Bag error is 0.86 (or accuracy being 1-0.86=99.14%). This is measure is the equivalent of accuracy using cross validation [(see link)](http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm)  
 In *appendix 2* you can see a table with measured importance of the variables included in the model.
 
 ### Testing the model
@@ -64,7 +68,7 @@ In *appendix 2* you can see a table with measured importance of the variables in
 We will then apply the random forest estimated in previous step to test data.
 
 ```{r,rf.prediction,echo=FALSE,message=FALSE}
-rf.pred<-predict(rf.model,test.data)
+rf.pred<-predict(rf.model,test.data[,-1])
 ```
 
 Below the results of the confusion matrix and statistics:
@@ -74,7 +78,7 @@ rf.conf<-confusionMatrix(rf.pred,test.data$classe)
 rf.conf
 ```
 
-The accuracy in the test data is above 99%, so this seems to be a pretty good model for our purposes. 
+The accuracy in the test data is above 99% (in line with oob error estimated in training section), so this seems to be a pretty good model for our purposes. 
 
 ### Graphs  
 ```{r graphs,echo=FALSE,fig.align='center'}
