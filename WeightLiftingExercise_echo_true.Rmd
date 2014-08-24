@@ -1,0 +1,98 @@
+---
+title: "WeighLiftingExercise_echo_true"
+output: html_document
+---
+### Executive Summary  
+The aim of this exercise is to estimate a prediction algorithm to forecast the manner in which a number of individuals do weight lifting. The data used in this exercise is from following paper:  
+
+* Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. [Available here](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf)  
+
+We use a Random Forest model in all numeric variables with no missing values in the data set. The pros of this approach is the high accuracy regularly achieved through this model while, in our particular case, the over-fitting not being a priori a big concern since all data is obtained in the same way and therefore error should be equally distributed in all cases (compared to the case where the data would have been obtained in different sessions and measurement equipment that would very probably bias the outcome of this model) Moreover, the number of cases is well balanced for all possible responses, so there risk of the random forest over-fitting the accuracy for one of the responses type but leaving the rest inaccurate is not big. On the other hand, random forest model is generally described as a "black box" model in which is difficult to understand what is the mechanism behind the model. Besides, this process requires a relative big amount of computation which may lead to performance problems in its estimation if the amount of data become very large or if the capacity of the computer is limited.      
+
+### Selection of variables  
+The raw data set can be downloaded in this [link](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv)  
+The complete data set includes one variable describing the possible outcome (5 factors from a to E) and 159 variables. There are 19,622 observations.  
+Many of the variables are not particularly useful (i.e.: names of the individual performing the exercise, time at which the exercise was performed) or have a large number of missing values. Thus, as a first step we pick only the variables with numeric values and no missing values in any case.  
+
+In this same step we split the complete data set into two separate sets:  
+
+1. Train data set containing 60% of the observations to train the data.
+2. Test data containing 40% of observations to apply the model and get a reliable measure of the accuracy of the models.  
+
+The table in *appendix 1* shows the variables selected for the different trains sets in which train our model. 
+
+``` {r part.data, echo=TRUE,message=FALSE}
+#upload data into R
+library(caret)
+raw.data <- read.csv("pml-training.csv", stringsAsFactors=FALSE)
+     
+set.seed(1)
+inTrain<-createDataPartition(y=raw.data$classe,p=0.6,list=FALSE)
+train<-raw.data[inTrain,]
+test<-raw.data[-inTrain,]
+
+data.num<-train[,sapply(train,class)=="numeric"]
+data.num.xna<-data.num[,sapply(data.num,anyNA)==FALSE]
+train.data<-data.frame("classe"=train$classe,data.num.xna)
+
+data.num<-test[,sapply(test,class)=="numeric"]
+data.num.xna<-data.num[,sapply(data.num,anyNA)==FALSE]
+test.data<-data.frame("classe"=test$classe,data.num.xna)
+```
+
+### Training the model
+
+We start by calculating parameters using a random forest model. We use for this the train set. This is, including the 27 variables in our original data that are numeric and have no missing values.  
+
+```{r,rf.estimation,echo=TRUE,message=FALSE}
+library(randomForest)
+rf.model<-randomForest(classe~.,data=train.data)
+```
+
+Below are displayed the results of this model in the training set. Package randomForest has been used using the complete set of 27 variables selected in previous section (see appendix 1).
+
+```{r,rf.result,echo=TRUE,results='markup'}
+rf.model
+```
+
+Estimated Out of Bag error is 86%. This is measure is the equivalent of accuracy using cross validation [(see link)](http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm)  
+In *appendix 2* you can see a table with measured importance of the variables included in the model.
+
+### Testing the model
+
+We will then apply the random forest estimated in previous step to test data.
+
+```{r,rf.prediction,echo=TRUE,message=FALSE}
+rf.pred<-predict(rf.model,test.data)
+```
+
+Below the results of the confusion matrix and statistics:
+
+```{r,rf.confusion,echo=TRUE,message=FALSE}
+rf.conf<-confusionMatrix(rf.pred,test.data$classe)
+rf.conf
+```
+
+The accuracy in the test data is above 99%, so this seems to be a pretty good model for our purposes. 
+
+### Graphs  
+```{r graphs,echo=TRUE,fig.align='center'}
+plot(rf.model,main="Estimated error (OOB)")
+
+library(ggplot2)
+library(reshape2)
+rf.conf.table<-melt(as.table(rf.conf))
+qplot(x=Reference, y=Prediction,main="Accuracy heatmap", data=rf.conf.table, fill=value, geom="tile") +
+   scale_fill_gradient(low="white",high="steelblue")
+```
+
+### Appendix 1: Variables selection
+``` {r variables.summary, echo=TRUE}
+str(train.data)
+```
+
+### Appendix 2: Random Forest variable importance
+``` {r rf.importance, echo=TRUE,results='asis'}
+library(knitr)
+kable(rf.model$importance,align="c")
+```
